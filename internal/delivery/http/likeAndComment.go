@@ -69,19 +69,13 @@ func (h *Handler) addComment(c *gin.Context) {
 		return
 	}
 
-	parentId, err := dtos.GetParentComment(c)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	var comment dtos.Comment
+	var comment dtos.AddCommentInput
 	if err := c.BindJSON(&comment); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.useCases.AddComment(userId, postId, parentId, comment.CommentText)
+	err = h.useCases.AddComment(userId, postId, comment)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -92,9 +86,43 @@ func (h *Handler) addComment(c *gin.Context) {
 	})
 }
 
+func (h *Handler) replyToComment(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+	postId, err := strconv.Atoi(c.Param("story_id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	parent_comment_id, err := strconv.Atoi(c.Param("comment_id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var comment dtos.AddCommentInput
+	if err := c.BindJSON(&comment); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.useCases.ReplyToComment(userId, postId, parent_comment_id, comment)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "reply added",
+	})
+
+}
+
 func (h *Handler) updateComment(c *gin.Context) {
 
-	commentId, err := dtos.GetCommentId(c)
+	commentId, err := strconv.Atoi(c.Param("comment_id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -127,7 +155,7 @@ func (h *Handler) updateComment(c *gin.Context) {
 }
 
 func (h *Handler) deleteComment(c *gin.Context) {
-	commentId, err := dtos.GetCommentId(c)
+	commentId, err := strconv.Atoi(c.Param("comment_id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

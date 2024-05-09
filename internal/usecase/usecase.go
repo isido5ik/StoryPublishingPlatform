@@ -6,22 +6,27 @@ import (
 )
 
 type Usecase interface {
-	CreateUserAsClient(input dtos.User) (int, error)
+	CreateUserAsClient(input dtos.SignUpInput) (int, error)
 	GenerateToken(username, password string) (string, []dtos.Roles, error)
 	ParseToken(token string) (int, []dtos.Roles, error)
 
-	CreateStory(story dtos.Post, userId int) (int, error)
-	GetStories() ([]dtos.Story, error)
-	GetUsersStories(userId int) (string, []dtos.Story, error)
-	GetStory(postId int) (dtos.Story, error)
+	CreateStory(story dtos.AddPostInput, userId int) (int, error)
+	GetStories(pagination dtos.PaginationParams) ([]dtos.Post, error)
+	GetUsersStories(userId int) (string, []dtos.Post, error)
+	GetStory(postId int) (dtos.Post, error)
 	DeleteStory(postId, userId int, role string) error
 	UpdateStory(postId, userId int, role string, input dtos.UpdateStoryInput) error
 
 	Like(userId, postId int) error
 	RemoveLike(userId, postId int) error
-	AddComment(userId, postId, parentId int, comment string) error
+	AddComment(userId, postId int, comment dtos.AddCommentInput) error
+	ReplyToComment(userId, postId, parentId int, comment dtos.AddCommentInput) error
 	UpdateComment(userId, postId, commentId int, newComment dtos.UpdateCommentInput) error
 	DeleteComment(userId, postId, commentId int) error
+
+	GetUsers() ([]dtos.User, error)
+	GetUserById(userId int) (dtos.User, error)
+	DeleteUser(userId int) error
 }
 
 type usecase struct {

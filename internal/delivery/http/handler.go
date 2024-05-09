@@ -1,59 +1,17 @@
-// package http
-
-// import (
-// 	"github.com/gin-gonic/gin"
-// 	"github.com/isido5ik/StoryPublishingPlatform/internal/usecase"
-// )
-
-// type Handler struct {
-// 	useCases usecase.Usecase
-// }
-
-// func NewHandler(useCase usecase.Usecase) *Handler {
-// 	return &Handler{useCases: useCase}
-// }
-
-// func (h *Handler) InitRoutes() *gin.Engine {
-// 	router := gin.New()
-
-// 	auth := router.Group("/auth")
-// 	{
-// 		auth.POST("/sign-up", h.signUp)
-// 		auth.POST("/sign-in", h.signIn)
-// 	}
-// 	story := router.Group("/story")
-// 	{
-
-// 		userIdentityMiddleware := h.UserIdentity()
-// 		story.Use(userIdentityMiddleware)
-
-// 		adminMiddleware := h.CheckRole(adminCtx)
-// 		clientMiddleware := h.CheckRole(clientCtx)
-
-// 		client := story.Group("/client")
-// 		{
-// 			client.POST("/", clientMiddleware, h.createPost)
-// 			client.GET("/", clientMiddleware, h.getPost)
-// 			client.DELETE("/:id", clientMiddleware, h.deletePost)
-// 		}
-
-// 		admin := story.Group("/admin")
-// 		{
-// 			admin.DELETE("/:id", adminMiddleware, h.deletePost)
-// 		}
-
-// 	}
-
-// 	//other handlers
-// 	return router
-// }
-
 package http
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/isido5ik/StoryPublishingPlatform/internal/usecase"
+
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	// gin-swagger middleware
+	_ "github.com/isido5ik/StoryPublishingPlatform/docs"
+	swaggerFiles "github.com/swaggo/files"
 )
+
+// swagger embed files
 
 const (
 	authorizationHeader = "Authorization"
@@ -74,6 +32,7 @@ func NewHandler(useCase usecase.Usecase) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	api := router.Group("/api")
 	{
 		auth := api.Group("/auth")
@@ -84,18 +43,16 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		stories := api.Group("/stories")
 		{
-			// Middleware
-			userIdentityMiddleware := h.UserIdentity()
-			// stories.Use(userIdentityMiddleware)
 
-			// Client routes
+			userIdentityMiddleware := h.UserIdentity()
+
 			stories.GET("/", h.getStories)
 
 			stories.POST("/", userIdentityMiddleware, h.createStory)
 			stories.GET("/my", userIdentityMiddleware, h.getUsersStories)
 			stories.GET("/:story_id", userIdentityMiddleware, h.getStory)
 			stories.PUT("/:story_id", userIdentityMiddleware, h.updateStory)
-			stories.DELETE("/:story_id", userIdentityMiddleware, h.deleteStory)
+			stories.DELETE("/:story_id", userIdentityMiddleware, h.deleteStory) //admin can delete story
 
 			like := stories.Group("/:story_id/like", userIdentityMiddleware)
 			{
@@ -105,8 +62,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			comment := stories.Group("/:story_id/comment", userIdentityMiddleware)
 			{
 				comment.POST("/", h.addComment)
-				comment.PUT("/", h.updateComment)
-				comment.DELETE("/", h.deleteComment)
+				comment.POST("/:comment_id", h.replyToComment)
+				comment.PUT("/:comment_id", h.updateComment)
+				comment.DELETE("/:comment_id", h.deleteComment)
 			}
 		}
 		admin := api.Group("/admin")
@@ -115,13 +73,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			admin.Use(h.CheckRole(adminCtx))
 
 			admin.GET("/users", h.getUsers)
-			admin.GET("/users/:user_id", h.getUser)
-			admin.PUT("/users/:user_id", h.updateUser)
+			admin.GET("/users/:user_id", h.getUserById)
 			admin.DELETE("/users/:user_id", h.deleteUser)
 		}
 	}
-
-	// Define other handlers here if needed
 
 	return router
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/isido5ik/StoryPublishingPlatform/dtos"
 )
 
-func (r *repository) CreateUserAsClient(input dtos.User) (int, error) {
+func (r *repository) CreateUserAsClient(input dtos.SignUpInput) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return 0, err

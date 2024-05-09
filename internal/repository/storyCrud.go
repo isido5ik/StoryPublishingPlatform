@@ -8,11 +8,11 @@ import (
 	"github.com/isido5ik/StoryPublishingPlatform/dtos"
 )
 
-func (r *repository) CreateStory(story dtos.Post, userId int) (int, error) {
+func (r *repository) CreateStory(story dtos.AddPostInput, userId int) (int, error) {
 	var postId int
 
-	query := fmt.Sprintf("INSERT INTO %s (user_id, content) VALUES($1, $2) RETURNING post_id", postsTable)
-	row := r.db.QueryRow(query, userId, story.Content)
+	query := fmt.Sprintf("INSERT INTO %s (user_id, title, content ) VALUES($1, $2, $3) RETURNING post_id", postsTable)
+	row := r.db.QueryRow(query, userId, story.Title, story.Content)
 	if err := row.Scan(&postId); err != nil {
 		return 0, err
 	}
@@ -20,24 +20,28 @@ func (r *repository) CreateStory(story dtos.Post, userId int) (int, error) {
 	return postId, nil
 }
 
-func (r *repository) GetStories() ([]dtos.Story, error) {
-	var stories []dtos.Story
-	query := fmt.Sprintf("SELECT u.username, p.content, p.comments, p.likes, p.created_at FROM %s p JOIN %s u ON p.user_id = u.user_id", postsTable, usersTable) //TODO: add pagination and filtration
-	err := r.db.Select(&stories, query)
-	return stories, err
-}
+func (r *repository) GetStories(pagination dtos.PaginationParams) ([]dtos.Post, error) {
+	var stories []dtos.Post
 
-func (r *repository) GetUsersStories(userId int) (string, []dtos.Story, error) {
-	var username string
-	var stories []dtos.Story
+	offset := (pagination.Page - 1) * pagination.PageSize
 
-	getUsernameQuery := fmt.Sprintf("SELECT username FROM %s WHERE user_id = $1", usersTable)
-	row := r.db.QueryRow(getUsernameQuery, userId)
-	if err := row.Scan(&username); err != nil {
-		return "", nil, err
+	query := fmt.Sprintf(
+		"SELECT u.username, p.user_id, p.post_id, p.title, p.content, p.comments, p.likes, p.created_at FROM %s p JOIN %s u ON p.user_id = u.user_id LIMIT %d OFFSET %d",
+		postsTable, usersTable, pagination.PageSize, offset)
+
+	if err := r.db.Select(&stories, query); err != nil {
+		log.Print("error")
+		return nil, err
 	}
 
-	getStoriesQuery := fmt.Sprintf("SELECT content, comments, likes, created_at FROM %s WHERE user_id = $1", postsTable)
+	return stories, nil
+}
+
+func (r *repository) GetUsersStories(userId int) (string, []dtos.Post, error) {
+	var username string
+	var stories []dtos.Post
+
+	getStoriesQuery := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", postsTable)
 
 	if err := r.db.Select(&stories, getStoriesQuery, userId); err != nil {
 		return "", nil, err
@@ -45,10 +49,10 @@ func (r *repository) GetUsersStories(userId int) (string, []dtos.Story, error) {
 	return username, stories, nil
 }
 
-func (r *repository) GetStory(postId int) (dtos.Story, error) {
-	var story dtos.Story
+func (r *repository) GetStory(postId int) (dtos.Post, error) {
+	var story dtos.Post
 
-	query := fmt.Sprintf("SELECT p.user_id, u.username, p.content, p.comments, p.likes, p.created_at FROM %s p JOIN %s u ON p.user_id = u.user_id WHERE post_id = $1", postsTable, usersTable)
+	query := fmt.Sprintf("SELECT u.username, p.user_id, p.post_id, p.title, p.content, p.comments, p.likes, p.created_at  FROM %s p JOIN %s u ON p.user_id = u.user_id WHERE post_id = $1", postsTable, usersTable)
 	if err := r.db.Get(&story, query, postId); err != nil {
 		return story, err
 	}

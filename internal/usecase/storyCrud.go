@@ -15,19 +15,19 @@ const (
 	rolesCtx            = "roles"
 )
 
-func (u *usecase) CreateStory(story dtos.Post, userId int) (int, error) {
+func (u *usecase) CreateStory(story dtos.AddPostInput, userId int) (int, error) {
 	return u.repos.CreateStory(story, userId)
 }
 
-func (u *usecase) GetStories() ([]dtos.Story, error) {
-	return u.repos.GetStories()
+func (u *usecase) GetStories(pagination dtos.PaginationParams) ([]dtos.Post, error) {
+	return u.repos.GetStories(pagination)
 }
 
-func (u *usecase) GetUsersStories(userId int) (string, []dtos.Story, error) {
+func (u *usecase) GetUsersStories(userId int) (string, []dtos.Post, error) {
 	return u.repos.GetUsersStories(userId)
 }
 
-func (u *usecase) GetStory(postId int) (dtos.Story, error) {
+func (u *usecase) GetStory(postId int) (dtos.Post, error) {
 	return u.repos.GetStory(postId)
 }
 
@@ -42,7 +42,7 @@ func (u *usecase) DeleteStory(postId, userId int, role string) error {
 		if err != nil {
 			return err
 		}
-		if story.UserId == userId {
+		if story.UserID == userId {
 			log.Printf("the post belongs to user")
 			return u.repos.DeleteStory(postId)
 		}
@@ -62,7 +62,7 @@ func (u *usecase) UpdateStory(postId, userId int, role string, input dtos.Update
 		if err != nil {
 			return err
 		}
-		if story.UserId == userId {
+		if story.UserID == userId {
 			log.Printf("the post belongs to user")
 			return u.repos.UpdateStory(postId, input)
 		}

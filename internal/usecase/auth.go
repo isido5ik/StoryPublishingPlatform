@@ -22,7 +22,12 @@ type tokenClaims struct {
 	Roles  []dtos.Roles `json:"roles"`
 }
 
-func (u *usecase) CreateUserAsClient(input dtos.User) (int, error) {
+func (u *usecase) CreateUserAsClient(input dtos.SignUpInput) (int, error) {
+	_, err := u.repos.GetUser(input.Username, generateHashPassword(input.Password))
+	if err == nil {
+		return 0, errors.New("user with this username already exists")
+	}
+
 	input.Password = generateHashPassword(input.Password)
 	return u.repos.CreateUserAsClient(input)
 }
@@ -39,13 +44,15 @@ func (u *usecase) GenerateToken(username, password string) (string, []dtos.Roles
 	roles, err := u.repos.GetRoles(user.UserID)
 	log.Println(roles)
 	if err != nil {
+		log.Print("error: u.repos.GetRoles(user.UserID)")
 		return "", nil, err
 	}
 
 	for _, role := range roles {
 		role_id, err := u.repos.GetRoleId(role, user.UserID)
-		log.Printf("%s role and his id %d (log from generate token method\n)", role, role_id)
+		log.Printf("%s role and his id %d (log from generate token method)\n", role, role_id)
 		if err != nil {
+			log.Print("error: u.repos.GetRoleId(role, user.UserID)")
 			return "", nil, err
 		}
 		rolesHeaders = append(rolesHeaders, dtos.Roles{RoleId: role_id, RoleName: role})

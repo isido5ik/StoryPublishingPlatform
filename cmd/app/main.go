@@ -15,6 +15,17 @@ import (
 	_ "github.com/lib/pq"
 )
 
+//@title Story Publishing Platform
+//@version 1.0
+//@description Rest Api Server
+
+// @host localhost:8000
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 

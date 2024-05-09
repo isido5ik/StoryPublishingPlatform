@@ -18,8 +18,12 @@ func (u *usecase) RemoveLike(userId, postId int) error {
 	return u.repos.RemoveLike(userId, postId)
 }
 
-func (u *usecase) AddComment(userId, postId, parentId int, comment string) error {
-	return u.repos.AddComment(userId, postId, parentId, comment)
+func (u *usecase) AddComment(userId, postId int, comment dtos.AddCommentInput) error {
+	return u.repos.AddComment(userId, postId, comment)
+}
+
+func (u *usecase) ReplyToComment(userId, postId, parentId int, comment dtos.AddCommentInput) error {
+	return u.repos.ReplyToComment(userId, postId, parentId, comment)
 }
 
 func (u *usecase) UpdateComment(userId, postId, commentId int, newComment dtos.UpdateCommentInput) error {

@@ -75,7 +75,8 @@ func (r *repository) RemoveLike(userId, postId int) error {
 
 }
 
-func (r *repository) AddComment(userId, postId, parentId int, comment string) error {
+func (r *repository) AddComment(userId, postId int, comment dtos.AddCommentInput) error {
+	log.Print(userId, postId, comment.CommentText)
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -87,22 +88,36 @@ func (r *repository) AddComment(userId, postId, parentId int, comment string) er
 		tx.Rollback()
 		return err
 	}
-	if parentId != 0 {
-		addCommentQuery := fmt.Sprintf("INSERT INTO %s (comment_text, parent_id, user_id, post_id) VALUES($1, $2, $3, $4)", commentsTable)
-		_, err = tx.Exec(addCommentQuery, comment, parentId, userId, postId)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-	} else {
-		addCommentQuery := fmt.Sprintf("INSERT INTO %s (comment_text, user_id, post_id) VALUES($1, $2, $3)", commentsTable)
-		_, err := tx.Exec(addCommentQuery, comment, userId, postId)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
+
+	addCommentQuery := fmt.Sprintf("INSERT INTO %s (comment_text, user_id, post_id) VALUES($1, $2, $3)", commentsTable)
+	_, err = tx.Exec(addCommentQuery, comment.CommentText, userId, postId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (r *repository) ReplyToComment(userId, postId, parentId int, comment dtos.AddCommentInput) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	incCommentQuery := fmt.Sprintf("UPDATE %s SET comments = comments + 1 WHERE post_id = $1", postsTable)
+	_, err = tx.Exec(incCommentQuery, postId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	addCommentQuery := fmt.Sprintf("INSERT INTO %s (comment_text, user_id, post_id, parent_id) VALUES($1, $2, $3, $4)", commentsTable)
+	_, err = tx.Exec(addCommentQuery, comment.CommentText, userId, postId, parentId)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 	return tx.Commit()
+
 }
 
 func (r *repository) UpdateComment(userId, postId, commentId int, newComment dtos.UpdateCommentInput) error {

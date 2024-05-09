@@ -11,11 +11,15 @@ type errorResponse struct {
 }
 
 type getStoriesResponse struct {
-	Data []dtos.Story `json:"data"`
+	Data []dtos.Post `json:"data"`
+}
+
+type getUsersResponse struct {
+	Data []dtos.User `json:"data"`
 }
 type getMyStoriesResponse struct {
-	Username  string       `json:"username"`
-	MyStories []dtos.Story `json:"stories"`
+	Username  string      `json:"username"`
+	MyStories []dtos.Post `json:"stories"`
 }
 
 func newErrorResponse(c *gin.Context, statusCode int, message string) {

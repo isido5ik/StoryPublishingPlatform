@@ -200,7 +200,7 @@ func (h *Handler) updateStory(c *gin.Context) {
 // @Tags stories
 // @Description delete story by id
 // @ID delete-story-by-id
-// @Param :story_id path int true "Post ID"
+// @Param :story_id path int true "Story ID"
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}

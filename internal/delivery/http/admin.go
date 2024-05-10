@@ -8,6 +8,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// @Summary Get Users
+// @Security ApiKeyAuth
+// @Tags users
+// @Description get all users
+// @ID get-all-users
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} getUsersResponse
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/admin/users [get]
 func (h *Handler) getUsers(c *gin.Context) {
 	users, err := h.useCases.GetUsers()
 	if err != nil {
@@ -21,6 +33,19 @@ func (h *Handler) getUsers(c *gin.Context) {
 	})
 }
 
+// @Summary Get User By Id
+// @Security ApiKeyAuth
+// @Tags users
+// @Description get user by id
+// @ID get-story-by-id
+// @Param :user_id path int true "User ID"
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/admin/users/{:user_id} [get]
 func (h *Handler) getUserById(c *gin.Context) {
 	userId, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
@@ -40,6 +65,19 @@ func (h *Handler) getUserById(c *gin.Context) {
 	})
 }
 
+// @Summary Delete User By Id
+// @Security ApiKeyAuth
+// @Tags users
+// @Description delete user by id
+// @ID delete-story-by-id
+// @Param :user_id path int true "User ID"
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/admin/users/{:user_id} [delete]
 func (h *Handler) deleteUser(c *gin.Context) {
 	userId, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {

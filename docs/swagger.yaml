@@ -71,6 +71,19 @@ definitions:
       content:
         type: string
     type: object
+  dtos.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      user_id:
+        type: integer
+      username:
+        type: string
+    type: object
   http.errorResponse:
     properties:
       message:
@@ -92,6 +105,13 @@ definitions:
           $ref: '#/definitions/dtos.Post'
         type: array
     type: object
+  http.getUsersResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.User'
+        type: array
+    type: object
 host: localhost:8000
 info:
   contact: {}
@@ -99,6 +119,121 @@ info:
   title: Story Publishing Platform
   version: "1.0"
 paths:
+  /api/admin/users:
+    get:
+      consumes:
+      - application/json
+      description: get all users
+      operationId: get-all-users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.getUsersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Users
+      tags:
+      - users
+  /api/admin/users/{:user_id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete user by id
+      operationId: delete-story-by-id
+      parameters:
+      - description: User ID
+        in: path
+        name: :user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete User By Id
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: get user by id
+      operationId: get-story-by-id
+      parameters:
+      - description: User ID
+        in: path
+        name: :user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get User By Id
+      tags:
+      - users
   /api/auth/sign-in:
     post:
       consumes:
@@ -256,7 +391,7 @@ paths:
       description: delete story by id
       operationId: delete-story-by-id
       parameters:
-      - description: Post ID
+      - description: Story ID
         in: path
         name: :story_id
         required: true

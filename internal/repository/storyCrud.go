@@ -2,10 +2,10 @@ package repository
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/isido5ik/StoryPublishingPlatform/dtos"
+	"github.com/sirupsen/logrus"
 )
 
 func (r *repository) CreateStory(story dtos.AddPostInput, userId int) (int, error) {
@@ -14,9 +14,9 @@ func (r *repository) CreateStory(story dtos.AddPostInput, userId int) (int, erro
 	query := fmt.Sprintf("INSERT INTO %s (user_id, title, content ) VALUES($1, $2, $3) RETURNING post_id", postsTable)
 	row := r.db.QueryRow(query, userId, story.Title, story.Content)
 	if err := row.Scan(&postId); err != nil {
+		logrus.WithError(err).Error("Failed to Scan postId")
 		return 0, err
 	}
-	log.Printf("doint request: %s", query)
 	return postId, nil
 }
 
@@ -30,7 +30,7 @@ func (r *repository) GetStories(pagination dtos.PaginationParams) ([]dtos.Post, 
 		postsTable, usersTable, pagination.PageSize, offset)
 
 	if err := r.db.Select(&stories, query); err != nil {
-		log.Print("error")
+		logrus.WithError(err).Error("Failed to select all stories")
 		return nil, err
 	}
 
@@ -44,6 +44,7 @@ func (r *repository) GetUsersStories(userId int) (string, []dtos.Post, error) {
 	getStoriesQuery := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", postsTable)
 
 	if err := r.db.Select(&stories, getStoriesQuery, userId); err != nil {
+		logrus.WithError(err).Error("Failed to select users stories")
 		return "", nil, err
 	}
 	return username, stories, nil
@@ -54,6 +55,7 @@ func (r *repository) GetStory(postId int) (dtos.Post, error) {
 
 	query := fmt.Sprintf("SELECT u.username, p.user_id, p.post_id, p.title, p.content, p.comments, p.likes, p.created_at  FROM %s p JOIN %s u ON p.user_id = u.user_id WHERE post_id = $1", postsTable, usersTable)
 	if err := r.db.Get(&story, query, postId); err != nil {
+		logrus.WithError(err).Error("Failed to get story by id")
 		return story, err
 	}
 
@@ -64,6 +66,7 @@ func (r *repository) DeleteStory(postId int) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE post_id = $1", postsTable)
 	_, err := r.db.Exec(query, postId)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to delete story")
 		return err
 	}
 
@@ -84,5 +87,9 @@ func (r *repository) UpdateStory(postId int, input dtos.UpdateStoryInput) error 
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE post_id = %d", postsTable, setQuery, postId)
 
 	_, err := r.db.Exec(query, args...)
-	return err
+	if err != nil {
+		logrus.WithError(err).Error("Failed to update story")
+		return err
+	}
+	return nil
 }

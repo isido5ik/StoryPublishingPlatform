@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  dtos.AddCommentInput:
+    properties:
+      comment_text:
+        type: string
+    required:
+    - comment_text
+    type: object
   dtos.AddPostInput:
     properties:
       content:
@@ -51,6 +58,13 @@ definitions:
     - email
     - password
     - username
+    type: object
+  dtos.UpdateCommentInput:
+    properties:
+      comment_text:
+        type: string
+    required:
+    - comment_text
     type: object
   dtos.UpdateStoryInput:
     properties:
@@ -201,7 +215,7 @@ paths:
       description: create story
       operationId: create-story
       parameters:
-      - description: recipe info
+      - description: story info
         in: body
         name: input
         required: true
@@ -361,6 +375,279 @@ paths:
       summary: Update Story By Id
       tags:
       - stories
+  /api/stories/{:story_id}/comment:
+    post:
+      consumes:
+      - application/json
+      description: add comment
+      operationId: add-comment
+      parameters:
+      - description: Story ID
+        in: path
+        name: :story_id
+        required: true
+        type: integer
+      - description: comment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AddCommentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add Comment
+      tags:
+      - Like and Comment
+  /api/stories/{:story_id}/comment/{:comment_id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete comment
+      operationId: delete-comment
+      parameters:
+      - description: Story ID
+        in: path
+        name: :story_id
+        required: true
+        type: integer
+      - description: Comment ID
+        in: path
+        name: :comment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Comment
+      tags:
+      - Like and Comment
+    post:
+      consumes:
+      - application/json
+      description: reply to comment
+      operationId: reply-to-comment
+      parameters:
+      - description: Story ID
+        in: path
+        name: :story_id
+        required: true
+        type: integer
+      - description: Comment ID
+        in: path
+        name: :comment_id
+        required: true
+        type: integer
+      - description: comment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AddCommentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Reply to Comment
+      tags:
+      - Like and Comment
+    put:
+      consumes:
+      - application/json
+      description: update comment
+      operationId: update-comment
+      parameters:
+      - description: Story ID
+        in: path
+        name: :story_id
+        required: true
+        type: integer
+      - description: Comment ID
+        in: path
+        name: :comment_id
+        required: true
+        type: integer
+      - description: comment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UpdateCommentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Comment
+      tags:
+      - Like and Comment
+  /api/stories/{:story_id}/like:
+    delete:
+      consumes:
+      - application/json
+      description: remove like
+      operationId: remove-like
+      parameters:
+      - description: Story ID
+        in: path
+        name: :story_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove Like
+      tags:
+      - Like and Comment
+    put:
+      consumes:
+      - application/json
+      description: like story
+      operationId: like-story
+      parameters:
+      - description: Story ID
+        in: path
+        name: :story_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Like Story
+      tags:
+      - Like and Comment
   /api/stories/my:
     get:
       consumes:

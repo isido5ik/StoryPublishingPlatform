@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/isido5ik/StoryPublishingPlatform/dtos"
+	"github.com/sirupsen/logrus"
 )
 
 // @Summary Create Story
@@ -15,7 +16,7 @@ import (
 // @ID create-story
 // @Accept  json
 // @Produce  json
-// @Param input body dtos.AddPostInput true "recipe info"
+// @Param input body dtos.AddPostInput true "story info"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
@@ -24,21 +25,25 @@ import (
 func (h *Handler) createStory(c *gin.Context) {
 	var story dtos.AddPostInput
 	if err := c.BindJSON(&story); err != nil {
+		logrus.WithError(err).Error("Failed to bind JSON for creating story")
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	userId, err := getUserId(c)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get user ID")
 		newErrorResponse(c, http.StatusForbidden, err.Error())
 		return
 	}
 
 	postId, err := h.useCases.CreateStory(story, userId)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to create story")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"postId": postId,
 	})
@@ -56,17 +61,18 @@ func (h *Handler) createStory(c *gin.Context) {
 // @Failure default {object} errorResponse
 // @Router /api/stories [get]
 func (h *Handler) getStories(c *gin.Context) {
-
 	var pagination dtos.PaginationParams
 	var err error
 	pagination.Page, pagination.PageSize, err = dtos.ValidatePage(c)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to validate pagination parameters")
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	stories, err := h.useCases.GetStories(pagination)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get stories")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -90,11 +96,13 @@ func (h *Handler) getStories(c *gin.Context) {
 func (h *Handler) getUsersStories(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get user ID")
 		newErrorResponse(c, http.StatusForbidden, err.Error())
 		return
 	}
 	username, stories, err := h.useCases.GetUsersStories(userId)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get user's stories")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -118,15 +126,16 @@ func (h *Handler) getUsersStories(c *gin.Context) {
 // @Failure default {object} errorResponse
 // @Router /api/stories/{:story_id} [get]
 func (h *Handler) getStory(c *gin.Context) {
-
 	postId, err := strconv.Atoi(c.Param("story_id"))
 	if err != nil {
+		logrus.WithError(err).Error("Failed to parse story ID")
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	story, err := h.useCases.GetStory(postId)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get story")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -152,27 +161,32 @@ func (h *Handler) getStory(c *gin.Context) {
 func (h *Handler) updateStory(c *gin.Context) {
 	var input dtos.UpdateStoryInput
 	if err := c.BindJSON(&input); err != nil {
+		logrus.WithError(err).Error("Failed to bind JSON for updating story")
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	postId, err := strconv.Atoi(c.Param("story_id"))
 	if err != nil {
+		logrus.WithError(err).Error("Failed to parse story ID")
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	userId, err := getUserId(c)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get user ID")
 		newErrorResponse(c, http.StatusForbidden, err.Error())
 		return
 	}
 	role, err := getRole(c)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get user role")
 		newErrorResponse(c, http.StatusForbidden, err.Error())
 		return
 	}
 	err = h.useCases.UpdateStory(postId, userId, role, input)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to update story")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -197,23 +211,27 @@ func (h *Handler) updateStory(c *gin.Context) {
 func (h *Handler) deleteStory(c *gin.Context) {
 	postId, err := strconv.Atoi(c.Param("story_id"))
 	if err != nil {
+		logrus.WithError(err).Error("Failed to parse story ID")
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	userId, err := getUserId(c)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get user ID")
 		newErrorResponse(c, http.StatusForbidden, err.Error())
 		return
 	}
 
 	role, err := getRole(c)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to get user role")
 		newErrorResponse(c, http.StatusForbidden, err.Error())
 		return
 	}
 
 	err = h.useCases.DeleteStory(postId, userId, role)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to delete story")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -221,5 +239,4 @@ func (h *Handler) deleteStory(c *gin.Context) {
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "deleted",
 	})
-
 }

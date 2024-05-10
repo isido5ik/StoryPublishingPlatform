@@ -30,7 +30,7 @@ func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
 	if err := configs.InitConfigs(); err != nil {
-		logrus.Fatal("error initializing configs", err.Error())
+		logrus.WithError(err).Fatal("error initializing configs")
 	}
 
 	if err := godotenv.Load(); err != nil {
@@ -44,6 +44,6 @@ func main() {
 
 	server := server.NewServer()
 	if err := server.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error occured while running http server: %s", err.Error())
+		logrus.WithError(err).Fatal("error occured while running http server")
 	}
 }

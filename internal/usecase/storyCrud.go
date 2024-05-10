@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/isido5ik/StoryPublishingPlatform/dtos"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -53,17 +54,17 @@ func (u *usecase) DeleteStory(postId, userId int, role string) error {
 
 func (u *usecase) UpdateStory(postId, userId int, role string, input dtos.UpdateStoryInput) error {
 	if role == adminCtx {
-		log.Printf("the user has role %s", role)
+		logrus.WithField("users_role", role)
 		return u.repos.UpdateStory(postId, input)
 	}
 	if role == clientCtx {
-		log.Printf("the user has role %s", role)
+		logrus.WithField("users_role", role)
 		story, err := u.repos.GetStory(postId)
 		if err != nil {
 			return err
 		}
 		if story.UserID == userId {
-			log.Printf("the post belongs to user")
+			logrus.Info("post belongs to user")
 			return u.repos.UpdateStory(postId, input)
 		}
 	}

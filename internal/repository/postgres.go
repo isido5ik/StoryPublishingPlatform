@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -34,11 +35,13 @@ func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
 	log.Print(source)
 	db, err := sqlx.Open("postgres", source)
 	if err != nil {
+		logrus.WithError(err).Error("Failed to connect with DB (open)")
 		return nil, err
 	}
 
 	err = db.Ping()
 	if err != nil {
+		logrus.WithError(err).Error("Failed to connect with DB (ping)")
 		return nil, err
 	}
 	return db, nil

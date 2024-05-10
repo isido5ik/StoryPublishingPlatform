@@ -3,15 +3,13 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/isido5ik/StoryPublishingPlatform/internal/usecase"
+	"github.com/sirupsen/logrus"
 
+	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	// gin-swagger middleware
 	_ "github.com/isido5ik/StoryPublishingPlatform/docs"
-	swaggerFiles "github.com/swaggo/files"
 )
-
-// swagger embed files
 
 const (
 	authorizationHeader = "Authorization"
@@ -30,6 +28,8 @@ func NewHandler(useCase usecase.Usecase) *Handler {
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
+	logrus.Info("Initializing routes...")
+
 	router := gin.New()
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -43,7 +43,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		stories := api.Group("/stories")
 		{
-
 			userIdentityMiddleware := h.UserIdentity()
 
 			stories.GET("/", h.getStories)
@@ -52,7 +51,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			stories.GET("/my", userIdentityMiddleware, h.getUsersStories)
 			stories.GET("/:story_id", userIdentityMiddleware, h.getStory)
 			stories.PUT("/:story_id", userIdentityMiddleware, h.updateStory)
-			stories.DELETE("/:story_id", userIdentityMiddleware, h.deleteStory) //admin can delete story
+			stories.DELETE("/:story_id", userIdentityMiddleware, h.deleteStory)
 
 			like := stories.Group("/:story_id/like", userIdentityMiddleware)
 			{
@@ -67,6 +66,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				comment.DELETE("/:comment_id", h.deleteComment)
 			}
 		}
+
 		admin := api.Group("/admin")
 		{
 			admin.Use(h.UserIdentity())

@@ -10,16 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func (h *Handler) UserIdentity() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.GetHeader(authorizationHeader)
 		if header == "" {
+			log.Println("Empty auth header")
 			newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
 			return
 		}
 		headerParts := strings.Split(header, " ")
 		if len(headerParts) != 2 {
+			log.Println("Invalid auth header")
 			newErrorResponse(c, http.StatusUnauthorized, "invalid auth header")
 			return
 		}
@@ -27,6 +28,7 @@ func (h *Handler) UserIdentity() gin.HandlerFunc {
 		log.Printf("HEADER PARTS: %s \n %s \n", headerParts[0], headerParts[1])
 		userId, roles, err := h.useCases.ParseToken(headerParts[1])
 		if err != nil {
+			log.Printf("Failed to parse token: %v", err)
 			newErrorResponse(c, http.StatusUnauthorized, err.Error())
 			return
 		}
@@ -34,11 +36,10 @@ func (h *Handler) UserIdentity() gin.HandlerFunc {
 		c.Set(userCtx, strconv.Itoa(userId))
 		for _, role := range roles {
 			c.Set(role.RoleName, strconv.Itoa(role.RoleId))
-			log.Printf("adding the role %s with id %d to header of request", role.RoleName, role.RoleId)
+			log.Printf("Adding the role %s with id %d to header of request", role.RoleName, role.RoleId)
 		}
 
 		c.Next()
-
 	}
 }
 
@@ -46,10 +47,11 @@ func (h *Handler) CheckRole(roleName string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		roleValue, ok := c.Get(roleName)
 		if !ok {
+			log.Printf("User doesn't have the required role: %s", roleName)
 			newErrorResponse(c, http.StatusForbidden, "user doesn't have the required role")
 			return
 		}
-		log.Printf("role value, key: %s value: %s \n", roleName, roleValue)
+		log.Printf("Role value, key: %s, value: %s \n", roleName, roleValue)
 		c.Next()
 	}
 }

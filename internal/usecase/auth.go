@@ -9,6 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/isido5ik/StoryPublishingPlatform/dtos"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -38,21 +39,23 @@ func (u *usecase) GenerateToken(username, password string) (string, []dtos.Roles
 		return "", nil, err
 	}
 
-	log.Printf("Here is user: %s", user.Username)
+	logrus.WithField("user", user.Username).Info("\nGetting user to generate token")
 
 	var rolesHeaders []dtos.Roles
 	roles, err := u.repos.GetRoles(user.UserID)
 	log.Println(roles)
 	if err != nil {
-		log.Print("error: u.repos.GetRoles(user.UserID)")
+
 		return "", nil, err
 	}
 
 	for _, role := range roles {
 		role_id, err := u.repos.GetRoleId(role, user.UserID)
-		log.Printf("%s role and his id %d (log from generate token method)\n", role, role_id)
+		logrus.WithField("role_id", role_id)
+		logrus.WithField("role", role).Info("Getting role id\n")
+
 		if err != nil {
-			log.Print("error: u.repos.GetRoleId(role, user.UserID)")
+			logrus.WithError(err).Error("Failed to get role id")
 			return "", nil, err
 		}
 		rolesHeaders = append(rolesHeaders, dtos.Roles{RoleId: role_id, RoleName: role})
@@ -69,6 +72,7 @@ func (u *usecase) GenerateToken(username, password string) (string, []dtos.Roles
 
 	tokenString, err := token.SignedString([]byte(signingKey))
 	if err != nil {
+		logrus.WithError(err).Error("Error signing string token")
 		return "", nil, err
 	}
 
@@ -84,6 +88,7 @@ func (u *usecase) ParseToken(tokenString string) (int, []dtos.Roles, error) {
 		return []byte(signingKey), nil
 	})
 	if err != nil {
+		logrus.WithError(err).Error("Failed to parse token")
 		return 0, nil, err
 	}
 

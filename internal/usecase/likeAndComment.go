@@ -6,23 +6,23 @@ import (
 	"github.com/isido5ik/StoryPublishingPlatform/dtos"
 )
 
-func (u *usecase) Like(userId, postId int) error {
+func (u *usecase) Like(userId, postId int) (int, error) {
 	return u.repos.Like(userId, postId)
 }
 
 func (u *usecase) RemoveLike(userId, postId int) error {
 	err := u.repos.CheckLike(userId, postId)
 	if err != nil {
-		return errors.New("Forbidden")
+		return errors.New("Forbidden/Removed")
 	}
 	return u.repos.RemoveLike(userId, postId)
 }
 
-func (u *usecase) AddComment(userId, postId int, comment dtos.AddCommentInput) error {
+func (u *usecase) AddComment(userId, postId int, comment dtos.AddCommentInput) (int, error) {
 	return u.repos.AddComment(userId, postId, comment)
 }
 
-func (u *usecase) ReplyToComment(userId, postId, parentId int, comment dtos.AddCommentInput) error {
+func (u *usecase) ReplyToComment(userId, postId, parentId int, comment dtos.AddCommentInput) (int, error) {
 	return u.repos.ReplyToComment(userId, postId, parentId, comment)
 }
 

@@ -2,9 +2,9 @@ package repository
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/isido5ik/StoryPublishingPlatform/dtos"
+	"github.com/sirupsen/logrus"
 )
 
 func (r *repository) CreateUserAsClient(input dtos.SignUpInput) (int, error) {
@@ -18,7 +18,7 @@ func (r *repository) CreateUserAsClient(input dtos.SignUpInput) (int, error) {
 	row := tx.QueryRow(createUserQuery, input.Username, input.Email, input.Password)
 	if err := row.Scan(&user_id); err != nil {
 		tx.Rollback()
-		log.Printf("error with method row.Scan(&user_id): %s", err.Error())
+		logrus.WithError(err).Error("Failed to create user")
 		return 0, err
 	}
 
@@ -27,7 +27,7 @@ func (r *repository) CreateUserAsClient(input dtos.SignUpInput) (int, error) {
 	row = tx.QueryRow(createClientQuery, user_id)
 	if err := row.Scan(&client_id); err != nil {
 		tx.Rollback()
-		log.Printf("error with method row.Scan(&client_id): %s", err.Error())
+		logrus.WithError(err).Error("Failed to create client")
 		return 0, err
 	}
 
@@ -35,7 +35,7 @@ func (r *repository) CreateUserAsClient(input dtos.SignUpInput) (int, error) {
 	_, err = tx.Exec(createConnectionQuery, user_id)
 	if err != nil {
 		tx.Rollback()
-		log.Printf("error while creating connection: %s", err.Error())
+		logrus.WithError(err).Error("Failed to create user-role connection")
 		return 0, err
 	}
 	return client_id, tx.Commit()
@@ -43,15 +43,14 @@ func (r *repository) CreateUserAsClient(input dtos.SignUpInput) (int, error) {
 
 func (r *repository) GetUser(username, password string) (dtos.User, error) {
 	var user dtos.User
-	log.Printf("username: %s, \npassword_hash: %s", username, password)
+	logrus.Debugf("username: %s, password_hash: %s", username, password)
 	getUserQuery := fmt.Sprintf("SELECT * FROM %s WHERE username = $1 AND password_hash = $2", usersTable)
 
 	err := r.db.Get(&user, getUserQuery, username, password)
 
 	if err != nil {
-		log.Printf("error with method get from db: %s \n", err.Error())
+		logrus.WithError(err).Error("Failed to get user from database")
 	}
-	log.Printf("doing query to sql: %s", getUserQuery)
 	return user, err
 }
 
@@ -60,7 +59,7 @@ func (r *repository) GetRoles(userId int) ([]string, error) {
 
 	getRolesQuery := fmt.Sprintf("SELECT r.role_name FROM %s r JOIN %s ur ON ur.role_id = r.role_id WHERE ur.user_id = $1", rolesTable, usersRolesTable)
 	if err := r.db.Select(&roles, getRolesQuery, userId); err != nil {
-		log.Printf("error in GetRoles, method r.db.Select(&roles, ...): %s", err.Error())
+		logrus.WithError(err).Error("Failed to get roles for user")
 		return nil, err
 	}
 	return roles, nil

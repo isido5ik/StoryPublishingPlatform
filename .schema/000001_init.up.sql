@@ -31,14 +31,18 @@ CREATE TABLE t_users_roles (
 CREATE TABLE t_posts (
     post_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES t_users(user_id) ON DELETE CASCADE,
+    category_id INTEGER REFERENCES t_categories(category_id) ON DELETE SET NULL,
     title TEXT NOT NULL, 
     content TEXT NOT NULL,
     comments INTEGER,
     likes INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
+CREATE TABLE t_categories (
+    category_id SERIAL PRIMARY KEY,
+    category_name VARCHAR(100) NOT NULL
+);
 
 CREATE TABLE t_comments (
     comment_id SERIAL PRIMARY KEY,

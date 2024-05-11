@@ -28,6 +28,10 @@ func (u *usecase) GetUsersStories(userId int) (string, []dtos.Post, error) {
 	return u.repos.GetUsersStories(userId)
 }
 
+func (u *usecase) GetStoriesByCategory(pagination dtos.PaginationParams, categoryId int) ([]dtos.Post, error) {
+	return u.repos.GetStoriesByCategory(pagination, categoryId)
+}
+
 func (u *usecase) GetStory(postId int) (dtos.Post, error) {
 	return u.repos.GetStory(postId)
 }

@@ -46,6 +46,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			userIdentityMiddleware := h.UserIdentity()
 
 			stories.GET("/", h.getStories)
+			stories.GET("/filter", h.getStoriesByCategory)
 
 			stories.POST("/", userIdentityMiddleware, h.createStory)
 			stories.GET("/my", userIdentityMiddleware, h.getUsersStories)

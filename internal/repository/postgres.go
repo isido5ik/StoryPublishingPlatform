@@ -26,6 +26,7 @@ const (
 	postsTable      = "t_posts"
 	commentsTable   = "t_comments"
 	likesTable      = "t_likes"
+	categoryTable   = "t_categories"
 )
 
 func NewPostgresDB(cfg Config) (*sqlx.DB, error) {

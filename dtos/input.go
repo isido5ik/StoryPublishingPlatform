@@ -12,8 +12,9 @@ type SignInInput struct {
 }
 
 type AddPostInput struct {
-	Title   string `json:"title" binding:"required"`
-	Content string `json:"content" binding:"required"`
+	Title      string `json:"title" binding:"required"`
+	Content    string `json:"content" binding:"required"`
+	CategoryID int    `json:"category_id" binding:"required"`
 }
 type UpdateStoryInput struct {
 	Content string `json:"content" db:"content"`

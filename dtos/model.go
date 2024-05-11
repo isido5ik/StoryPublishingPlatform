@@ -16,14 +16,16 @@ type User struct {
 }
 
 type Post struct {
-	PostID    int       `json:"post_id" db:"post_id"`
-	Author    string    `json:"author" db:"username"`
-	UserID    int       `json:"user_id" db:"user_id"`
-	Title     string    `json:"title" db:"title"`
-	Content   string    `json:"content" db:"content"`
-	Comments  int       `json:"comments" db:"comments"`
-	Likes     int       `json:"likes" db:"likes"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	PostID       int       `json:"post_id" db:"post_id"`
+	Author       string    `json:"author" db:"username"`
+	UserID       int       `json:"user_id" db:"user_id"`
+	Title        string    `json:"title" db:"title"`
+	CategoryName string    `json:"category_name" db:"category_name"`
+	CategoryID   int       `json:"category_id" db:"category_id" binding:"required"`
+	Content      string    `json:"content" db:"content"`
+	Comments     int       `json:"comments" db:"comments"`
+	Likes        int       `json:"likes" db:"likes"`
+	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 }
 
 type Comment struct {

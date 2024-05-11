@@ -98,7 +98,12 @@ func (r *repository) AddComment(userId, postId int, comment dtos.AddCommentInput
 	}
 
 	var commentId int
-	addCommentQuery := fmt.Sprintf("INSERT INTO %s (comment_text, user_id, post_id) VALUES($1, $2, $3) RETURNING comment_id", commentsTable)
+
+	addCommentQuery := fmt.Sprintf(`
+		INSERT INTO %s (comment_text, user_id, post_id) 
+		VALUES ($1, $2, $3) 
+		RETURNING comment_id`, commentsTable)
+
 	row := r.db.QueryRow(addCommentQuery, comment.CommentText, userId, postId)
 	if err := row.Scan(&commentId); err != nil {
 		logrus.WithError(err).Error("Failed to add comment")
@@ -121,7 +126,12 @@ func (r *repository) ReplyToComment(userId, postId, parentId int, comment dtos.A
 		return 0, err
 	}
 	var commentId int
-	addCommentQuery := fmt.Sprintf("INSERT INTO %s (comment_text, user_id, post_id, parent_id) VALUES($1, $2, $3, $4) RETURNING comment_id", commentsTable)
+
+	addCommentQuery := fmt.Sprintf(`
+		INSERT INTO %s (comment_text, user_id, post_id, parent_id) 
+		VALUES ($1, $2, $3, $4) 
+		RETURNING comment_id`, commentsTable)
+
 	row := r.db.QueryRow(addCommentQuery, comment.CommentText, userId, postId, parentId)
 	if err := row.Scan(&commentId); err != nil {
 		logrus.WithError(err).Error("Failed to add comment (reply)")

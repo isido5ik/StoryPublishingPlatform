@@ -13,6 +13,7 @@ type Usecase interface {
 	CreateStory(story dtos.AddPostInput, userId int) (int, error)
 	GetStories(pagination dtos.PaginationParams) ([]dtos.Post, error)
 	GetUsersStories(userId int) (string, []dtos.Post, error)
+	GetStoriesByCategory(pagination dtos.PaginationParams, categoryId int) ([]dtos.Post, error)
 	GetStory(postId int) (dtos.Post, error)
 	DeleteStory(postId, userId int, role string) error
 	UpdateStory(postId, userId int, role string, input dtos.UpdateStoryInput) error

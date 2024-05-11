@@ -9,17 +9,24 @@ definitions:
     type: object
   dtos.AddPostInput:
     properties:
+      category_id:
+        type: integer
       content:
         type: string
       title:
         type: string
     required:
+    - category_id
     - content
     - title
     type: object
   dtos.Post:
     properties:
       author:
+        type: string
+      category_id:
+        type: integer
+      category_name:
         type: string
       comments:
         type: integer
@@ -35,6 +42,8 @@ definitions:
         type: string
       user_id:
         type: integer
+    required:
+    - category_id
     type: object
   dtos.SignInInput:
     properties:
@@ -783,6 +792,44 @@ paths:
       summary: Like Story
       tags:
       - Like and Comment
+  /api/stories/filter:
+    get:
+      consumes:
+      - application/json
+      description: get story by category
+      operationId: get-story-by-category
+      parameters:
+      - description: Category ID
+        in: query
+        name: category_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Get Story By Category
+      tags:
+      - stories
   /api/stories/my:
     get:
       consumes:

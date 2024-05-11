@@ -112,6 +112,45 @@ func (h *Handler) getUsersStories(c *gin.Context) {
 	})
 }
 
+// @Summary Get Story By Category
+// @Tags stories
+// @Description get story by category
+// @ID get-story-by-category
+// @Param category_id query int true "Category ID"
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} dtos.Post
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/stories/filter [get]
+func (h *Handler) getStoriesByCategory(c *gin.Context) {
+	var pagination dtos.PaginationParams
+	var err error
+	pagination.Page, pagination.PageSize, err = dtos.ValidatePage(c)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to validate pagination parameters")
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	categoryId, err := dtos.GetCategoryId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	stories, err := h.useCases.GetStoriesByCategory(pagination, categoryId)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to get stories")
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, getStoriesResponse{
+		Data: stories,
+	})
+}
+
 // @Summary Get Story By Id
 // @Security ApiKeyAuth
 // @Tags stories

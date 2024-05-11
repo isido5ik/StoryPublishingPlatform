@@ -420,6 +420,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/stories/filter": {
+            "get": {
+                "description": "get story by category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stories"
+                ],
+                "summary": "Get Story By Category",
+                "operationId": "get-story-by-category",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Category ID",
+                        "name": "category_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Post"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/stories/my": {
             "get": {
                 "security": [
@@ -1099,10 +1156,14 @@ const docTemplate = `{
         "dtos.AddPostInput": {
             "type": "object",
             "required": [
+                "category_id",
                 "content",
                 "title"
             ],
             "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
                 "content": {
                     "type": "string"
                 },
@@ -1113,8 +1174,17 @@ const docTemplate = `{
         },
         "dtos.Post": {
             "type": "object",
+            "required": [
+                "category_id"
+            ],
             "properties": {
                 "author": {
+                    "type": "string"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "category_name": {
                     "type": "string"
                 },
                 "comments": {

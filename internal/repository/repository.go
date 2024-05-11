@@ -14,6 +14,7 @@ type Repository interface {
 	CreateStory(story dtos.AddPostInput, userId int) (int, error)
 	GetStories(pagination dtos.PaginationParams) ([]dtos.Post, error)
 	GetUsersStories(userId int) (string, []dtos.Post, error)
+	GetStoriesByCategory(pagination dtos.PaginationParams, categoryId int) ([]dtos.Post, error)
 	GetStory(postId int) (dtos.Post, error)
 	DeleteStory(postId int) error
 	UpdateStory(postId int, input dtos.UpdateStoryInput) error

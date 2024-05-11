@@ -25,7 +25,7 @@ func (h *Handler) signUp(c *gin.Context) {
 
 	if err := c.BindJSON(&input); err != nil {
 		logrus.WithError(err).Error("Failed to bind JSON")
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 

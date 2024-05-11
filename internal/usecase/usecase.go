@@ -5,6 +5,7 @@ import (
 	"github.com/isido5ik/StoryPublishingPlatform/internal/repository"
 )
 
+//go:generate mockgen -source=usecase.go -destination=mocks/mock.go
 type Usecase interface {
 	CreateUserAsClient(input dtos.SignUpInput) (int, error)
 	GenerateToken(username, password string) (string, []dtos.Roles, error)
